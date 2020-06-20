@@ -10,8 +10,10 @@
 #include <stdlib.h>
 
 #define GENOM_LEN 64
+#define BOTS_START_CNT 64
 #define F_SIZE_HOR 45
 #define F_SIZE_VERT 20
+#define BOT_START_HP 40
 
 // Все данные бота
 typedef struct bot {
@@ -29,10 +31,24 @@ typedef struct bots {
 } Bots;
 
 
-// Создает случайный геном
-int createRandGenom (Bot *cur) {
-	int a;
+// Возвращает случайное число
+int getRandomInt (int min, int max) {
+	return rand() % (max - min + 1) + min;
+}
+
+
+// Создает случайного бота
+int createRandomBot (Bot *cur, int number) {
+	int i;
 	cur->next = NULL;
+	cur->hp = BOT_START_HP;
+	cur->id = number;
+	cur->view = getRandomInt (0, 7);
+	cur->col = getRandomInt (0, F_SIZE_HOR);
+	cur->row = getRandomInt (0, F_SIZE_VERT);
+	for (i = 0; i < GENOM_LEN; i++) {
+		cur->genom[i] = getRandomInt (0, GENOM_LEN);
+	}
 
 	return 0;
 }
@@ -41,23 +57,22 @@ int createRandGenom (Bot *cur) {
 int initBots (Bots **B) {
 	int i;
 	srand (time(NULL));
-	Bots *new_b = malloc (sizeof (Bots));  // Создан список ботов
-	if (new_b == NULL)
+	Bots *newBotsList = malloc (sizeof (Bots));  // Создан список ботов
+	if (newBotsList == NULL)
 		return 1;
-	new_b->first = NULL;
-	new_b->last = NULL;
-
-	if (*B == NULL)
-		*B = new_b;
+	newBotsList->first = NULL;
+	newBotsList->last = NULL;
+	
+	*B = newBotsList;
 
 	Bot *cur;
 
-	for (i = 0; i < GENOM_LEN; i++) {
+	for (i = 0; i < BOTS_START_CNT; i++) {
 		cur = malloc (sizeof(Bot));
 		if (cur == NULL)
 			return 1;
 
-		createRandGenom (cur);
+		createRandomBot (cur, i);
 
 		if ((*B)->first == NULL) {
 			(*B)->first = cur;
@@ -99,6 +114,7 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	else {
 		// Не реализовано
 	}
+	return 0;
 }
 
 
