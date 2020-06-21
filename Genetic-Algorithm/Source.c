@@ -1,6 +1,6 @@
-/*
-Лабораторная работа номер 5. Генетический алгоритм.
-Червинский Артём, Степаненко Кирилл, ИВТ-13БО.
+п»ї/*
+Р›Р°Р±РѕСЂР°С‚РѕСЂРЅР°СЏ СЂР°Р±РѕС‚Р° РЅРѕРјРµСЂ 5. Р“РµРЅРµС‚РёС‡РµСЃРєРёР№ Р°Р»РіРѕСЂРёС‚Рј.
+Р§РµСЂРІРёРЅСЃРєРёР№ РђСЂС‚С‘Рј, РЎС‚РµРїР°РЅРµРЅРєРѕ РљРёСЂРёР»Р», РР’Рў-13Р‘Рћ.
 
 */
 
@@ -11,41 +11,60 @@
 
 #define GENOM_LEN 64
 #define BOTS_START_CNT 64
+#define BOTS_TRIG_CNT 8
+#define BOTS_START_HP 40
 #define F_SIZE_HOR 45
 #define F_SIZE_VERT 20
-#define BOT_START_HP 40
+#define F_WALLS_CNT 8
+#define F_FOOD_CNT 64
+#define F_POIS_CNT 32
+#define F_CHAR_WALL '#'
+#define F_CHAR_SPACE ' '
+#define F_CHAR_FOOD '@'
+#define F_CHAR_POIS 'СЏ'
 
-// Все данные бота
+
+// Р’СЃРµ РґР°РЅРЅС‹Рµ Р±РѕС‚Р°
 typedef struct bot {
 	int genom[GENOM_LEN];
-	int id; // Идентификатор 0..63	
-	int row, col; // row и col, координаты бота
-	int hp; // Число очков жизни 0..99
-	int view; // Направление взгляда 0..7
+	int id; // РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ 0..63	
+	int row, col; // row Рё col, РєРѕРѕСЂРґРёРЅР°С‚С‹ Р±РѕС‚Р°
+	int hp; // Р§РёСЃР»Рѕ РѕС‡РєРѕРІ Р¶РёР·РЅРё 0..99
+	int view; // РќР°РїСЂР°РІР»РµРЅРёРµ РІР·РіР»СЏРґР° 0..7
 	struct bot *next;
 } Bot;
 
-// Список ботов
+// РЎРїРёСЃРѕРє Р±РѕС‚РѕРІ
 typedef struct bots {
 	Bot *first, *last;
+	int cnt;
 } Bots;
 
+typedef struct config {
+	int stepNum; // РќРѕРјРµСЂ С…РѕРґР° РІ РїРѕРєРѕР»РµРЅРёРё
+	int genNum; // РќРѕРјРµСЂ РїРѕРєРѕР»РµРЅРёСЏ РІ РіРµРЅРµСЂР°С†РёРё
+	int savedGens[BOTS_TRIG_CNT]; // РњР°СЃСЃРёРІ РІС‹Р¶РёРІС€РёС… РІ РїСЂРѕС€Р»РѕРј РїРѕРєРѕР»РµРЅРёРё РіРµРЅРѕРјРѕРІ
+} Config;
 
-// Возвращает случайное число
+
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃР»СѓС‡Р°Р№РЅРѕРµ С‡РёСЃР»Рѕ
 int getRandomInt (int min, int max) {
 	return rand() % (max - min + 1) + min;
 }
 
-
-// Создает случайного бота
-int createRandomBot (Bot *cur, int number) {
-	int i;
+// РЎРѕР·РґР°РµС‚ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ Р±РѕС‚Р°
+int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number) {
+	int i, r, c;
 	cur->next = NULL;
-	cur->hp = BOT_START_HP;
+	cur->hp = BOTS_START_HP;
 	cur->id = number;
 	cur->view = getRandomInt (0, 7);
-	cur->col = getRandomInt (0, F_SIZE_HOR);
-	cur->row = getRandomInt (0, F_SIZE_VERT);
+	do {
+		c = getRandomInt (0, F_SIZE_HOR);
+		r = getRandomInt (0, F_SIZE_VERT);
+	} while (F[r][c] != F_CHAR_SPACE);
+	cur->col = c;
+	cur->row = r;
 	for (i = 0; i < GENOM_LEN; i++) {
 		cur->genom[i] = getRandomInt (0, GENOM_LEN);
 	}
@@ -53,16 +72,15 @@ int createRandomBot (Bot *cur, int number) {
 	return 0;
 }
 
-
-int initBots (Bots **B) {
+// РЎРѕР·РґР°РµС‚ СЃРїРёСЃРѕРє Р±РѕС‚РѕРІ
+int initBots (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 	int i;
-	srand (time(NULL));
-	Bots *newBotsList = malloc (sizeof (Bots));  // Создан список ботов
+	Bots *newBotsList = malloc (sizeof (Bots));  // РЎРѕР·РґР°РЅ СЃРїРёСЃРѕРє Р±РѕС‚РѕРІ
 	if (newBotsList == NULL)
 		return 1;
 	newBotsList->first = NULL;
 	newBotsList->last = NULL;
-	
+	newBotsList->cnt = BOTS_START_CNT;
 	*B = newBotsList;
 
 	Bot *cur;
@@ -72,8 +90,8 @@ int initBots (Bots **B) {
 		if (cur == NULL)
 			return 1;
 
-		createRandomBot (cur, i);
-
+		createRandomBot (F, cur, i);
+		F[cur->row][cur->col] = cur->hp / 10 + '0';
 		if ((*B)->first == NULL) {
 			(*B)->first = cur;
 			(*B)->last = cur;
@@ -86,101 +104,178 @@ int initBots (Bots **B) {
 	return 0;
 }
 
-// Создает поле по данному списку ботов
+// РЎРѕР·РґР°РµС‚ РїРѕР»Рµ РїРѕ РґР°РЅРЅРѕРјСѓ СЃРїРёСЃРєСѓ Р±РѕС‚РѕРІ
 int initField (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
+	int i, j, k, r, c, len;
 
-}
+	for (i = 1; i < F_SIZE_VERT; i++) {
+		for (j = 1; j < F_SIZE_HOR; j++) {
+			F[i][j] = F_CHAR_SPACE;
+		}
+	}
+	for (j = 0; j < F_SIZE_HOR; j++)
+		F[0][j] = F_CHAR_WALL;
+	for (j = 0; j < F_SIZE_HOR; j++)
+		F[F_SIZE_VERT-1][j] = F_CHAR_WALL;
+	for (i = 0; i < F_SIZE_VERT; i++)
+		F[i][0] = F_CHAR_WALL;
+	for (i = 0; i < F_SIZE_VERT; i++)
+		F[i][F_SIZE_HOR-1] = F_CHAR_WALL;
 
-
-// Загружает или создает новую конфигурацию симуляции
-int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
-	int i, j, createOrLoad;
-
-	printf("Создать или загрузить симуляцию? [1\\0]: ");
-	if (scanf("%d", &createOrLoad) == 0) {
-		system("pause");
-		return 1;
+	// РџРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ СЃС‚РµРЅС‹ РЅРµ РґРѕР»Р¶РЅС‹ РјРµРЅСЏС‚СЊСЃСЏ РїСЂРё С…РѕРґР°С…!
+	for (k = 0; k < F_WALLS_CNT; k++) {
+		len = getRandomInt (3, 5);
+		r = getRandomInt (len, F_SIZE_VERT-len-1);
+		c = getRandomInt (len, F_SIZE_HOR-len-1);
+		
+		for (i = 0; i < len; i++) {
+			if (k % 2 == 0)
+				F[r][c+i] = F_CHAR_WALL;
+			else 
+				F[r+i][c] = F_CHAR_WALL;
+		}
 	}
 
-	// Создание новой
-	if (createOrLoad == 1) {
-		// Создание ботов
-		if (initBots (Bots))
-			return 1;
-		if (initField (F, Bots))
-			return 1;
-	}
-	// Загрузка из файла
-	else {
-		// Не реализовано
+	for (i = 0; i < F_SIZE_VERT; i++) {
+		for (j = 0; j < F_SIZE_HOR; j++) {
+			printf("%c", F[i][j]);
+		}
+		printf("\n");
 	}
 	return 0;
 }
 
+// РќР°РїРѕР»РЅСЏРµС‚ РјРёСЂ РµРґРѕР№ Рё СЏРґРѕРј
+int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
+	int i, j, r, c;
+	for (i = 0; i < F_FOOD_CNT; i++) {
+		do {
+			r = getRandomInt (1, F_SIZE_VERT);
+			c = getRandomInt (1, F_SIZE_HOR);
+		} while (F[r][c] != F_CHAR_SPACE);
+		F[r][c] = F_CHAR_FOOD;
+	}
+	for (i = 0; i < F_POIS_CNT; i++) {
+		do {
+			r = getRandomInt (1, F_SIZE_VERT);
+			c = getRandomInt (1, F_SIZE_HOR);
+		} while (F[r][c] != F_CHAR_SPACE);
+		F[r][c] = F_CHAR_POIS;
+	}
+}
 
-// Нужно ли создавать новое поколение
+// Р—Р°РіСЂСѓР¶Р°РµС‚ РёР»Рё СЃРѕР·РґР°РµС‚ РЅРѕРІСѓСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ СЃРёРјСѓР»СЏС†РёРё
+int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
+	int i, j, createOrLoad = 1;
+	srand (time(NULL));
+	/*
+	printf("РЎРѕР·РґР°С‚СЊ РёР»Рё Р·Р°РіСЂСѓР·РёС‚СЊ СЃРёРјСѓР»СЏС†РёСЋ? [1\\0]: ");
+	if (scanf("%d", &createOrLoad) == 0) {
+		scanf("%d");
+		return 1;
+	}
+	*/
+	// РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕР№
+	if (createOrLoad == 1) {
+		// РЎРѕР·РґР°РЅРёРµ РјРёСЂР° СЃРѕ СЃС‚РµРЅР°РјРё
+		initField (F, Bots);
+		// РЎРѕР·РґР°РЅРёРµ Р±РѕС‚РѕРІ
+		if (initBots (F, Bots))
+			return 1;
+		// Р—Р°РїРѕР»РЅРµРЅРёРµ РјРёСЂР° РµРґРѕР№ Рё СЏРґРѕРј
+		fillField (F);
+
+		for (i = 0; i < F_SIZE_VERT; i++) {
+			for (j = 0; j < F_SIZE_HOR; j++) {
+				printf("%c", F[i][j]);
+			}
+			printf("\n");
+		}
+	}
+	// Р—Р°РіСЂСѓР·РєР° РёР· С„Р°Р№Р»Р°
+	else {
+		// РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ
+	}
+	return 0;
+}
+
+// РќСѓР¶РЅРѕ Р»Рё СЃРѕР·РґР°РІР°С‚СЊ РЅРѕРІРѕРµ РїРѕРєРѕР»РµРЅРёРµ
 int isEndGeneration () {
 
 }
 
-
-// Обрабатывает ходы ботов
+// РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ С…РѕРґС‹ Р±РѕС‚РѕРІ
 int handleBots () {
 
 }
 
-
-// Выводит поле и доп информацию
+// Р’С‹РІРѕРґРёС‚ РїРѕР»Рµ Рё РґРѕРї РёРЅС„РѕСЂРјР°С†РёСЋ
 int printInfo () {
 
 }
 
-
-// Проверяет, нажал ли пользователь на паузу
+// РџСЂРѕРІРµСЂСЏРµС‚, РЅР°Р¶Р°Р» Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР° РїР°СѓР·Сѓ
 int isPause () {
 
 }
 
-
-// Останавливает симуляцию
-int stopSim () {
+// РЎРѕС…СЂР°РЅСЏРµС‚ СЃРёРјСѓР»СЏС†РёСЋ
+int saveSim () {
 
 }
 
-
-// Уменьшает скорость мелькания экрана
+// РЈРјРµРЅСЊС€Р°РµС‚ СЃРєРѕСЂРѕСЃС‚СЊ РјРµР»СЊРєР°РЅРёСЏ СЌРєСЂР°РЅР°
 int littlePause () {
 
 }
 
+// РЎРѕР·РґР°РµС‚ РЅРѕРІРѕРµ РїРѕРєРѕР»РµРЅРёРµ
+int evolveSeed () {
 
-// Объединяет смену ходов, поколений и геномов
-int mainCycle () {
-	// Условие выхода находится внутри
-	// (По нажатию клавиши)
+}
+
+// Р—Р°СЃРµР»СЏРµС‚ Р±РѕС‚РѕРІ РІ РјРёСЂ
+int spawnSeed () {
+
+}
+
+// РЎРѕС…СЂР°РЅСЏРµС‚ РЅРѕРјРµСЂР° РІС‹Р¶РёРІС€РёС… Р±РѕС‚РѕРІ
+int saveConfig () {
+
+}
+
+// РћР±СЉРµРґРёРЅСЏРµС‚ СЃРјРµРЅСѓ С…РѕРґРѕРІ, РїРѕРєРѕР»РµРЅРёР№ Рё РіРµРЅРѕРјРѕРІ
+int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
+	// РЈСЃР»РѕРІРёРµ РІС‹С…РѕРґР° РЅР°С…РѕРґРёС‚СЃСЏ РІРЅСѓС‚СЂРё
+	// (РџРѕ РЅР°Р¶Р°С‚РёСЋ РєР»Р°РІРёС€Рё)
 	while (1) {
-		while (!isEndGeneration ())  // Пока на поле больше 8 ботов
+		while (1)  // РЎРјРµРЅР° РїРѕРєРѕР»РµРЅРёР№
 		{
-			handleBots ();  // Обработать ходы ботов			
-			printInfo ();  // Вывести измененное поле
-			if (isPause ())  // Если пользователь остановил симуляцию
+			if (handleBots ()) // РџСЂРѕРІРµСЂРєР° РЅР° РєРѕРЅРµС† РїРѕРєРѕР»РµРЅРёСЏ
+				break;				
+			printInfo ();  // Р’С‹РІРµСЃС‚Рё РёР·РјРµРЅРµРЅРЅРѕРµ РїРѕР»Рµ
+			if (isPause ())  // РћР±СЂР°Р±РѕС‚РєР° РїР°СѓР·С‹
 			{
-				stopSim ();  // Пауза, выход или сохранение в файл
+				if (saveSim ())  // РЎРѕС…СЂР°РЅРµРЅРёРµ РІ С„Р°Р№Р»
+					return 0;
 			}
 			else {
-				littlePause ();  // Небольшой Sleep (50), чтобы не мелькал экран
+				littlePause ();  // РќРµР±РѕР»СЊС€РѕР№ Sleep (50), С‡С‚РѕР±С‹ РЅРµ РјРµР»СЊРєР°Р» СЌРєСЂР°РЅ
 			}
-		}
-		//
+		}	
+		// Р—Р°РїРѕРјРЅРёС‚СЊ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ 
+		saveConfig ();
+		// РЎРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ РЅРѕРІРѕРµ РїРѕРєРѕР»РµРЅРёРµ
+		evolveSeed ();
+		// Р—Р°СЃРµР»РёС‚СЊ РІ РјРёСЂ
+		spawnSeed ();
 	}
 }
 
-
-// Завершает работу симуляции
+// Р—Р°РІРµСЂС€Р°РµС‚ СЂР°Р±РѕС‚Сѓ СЃРёРјСѓР»СЏС†РёРё
 int result () {
 
 }
-
 
 int main() {
 	setlocale(LC_ALL, "RUS");
@@ -190,9 +285,9 @@ int main() {
 
 	if (init (Field, &Bots))
 		return 0;
-	mainCycle ();
+	mainCycle (Field, &Bots);
 	result ();
 
-	system("pause");
+	scanf("%d");
 	return 0;
 }
