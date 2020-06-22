@@ -8,13 +8,16 @@
 #include <stdio.h>
 #include <locale.h>
 #include <stdlib.h>
+#include <string.h>
 
+#define FILE_INP_NAME "input.txt"
+#define FILE_OUT_NAME "output.txt"
 #define GENOM_LEN 64
 #define BOTS_START_CNT 64
 #define BOTS_TRIG_CNT 8
-#define BOTS_START_HP 40
-#define F_SIZE_HOR 45
-#define F_SIZE_VERT 20
+#define BOTS_START_HP 30
+#define F_SIZE_HOR 51
+#define F_SIZE_VERT 21
 #define F_WALLS_CNT 8
 #define F_FOOD_CNT 64
 #define F_POIS_CNT 32
@@ -60,8 +63,8 @@ int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number) {
 	cur->id = number;
 	cur->view = getRandomInt (0, 7);
 	do {
-		c = getRandomInt (0, F_SIZE_HOR);
-		r = getRandomInt (0, F_SIZE_VERT);
+		c = getRandomInt (1, F_SIZE_HOR-1);
+		r = getRandomInt (1, F_SIZE_VERT-1);
 	} while (F[r][c] != F_CHAR_SPACE);
 	cur->col = c;
 	cur->row = r;
@@ -105,7 +108,7 @@ int initBots (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 }
 
 // Создает поле по данному списку ботов
-int initField (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
+int initField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 	int i, j, k, r, c, len;
 
 	for (i = 1; i < F_SIZE_VERT; i++) {
@@ -135,13 +138,6 @@ int initField (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 				F[r+i][c] = F_CHAR_WALL;
 		}
 	}
-
-	for (i = 0; i < F_SIZE_VERT; i++) {
-		for (j = 0; j < F_SIZE_HOR; j++) {
-			printf("%c", F[i][j]);
-		}
-		printf("\n");
-	}
 	return 0;
 }
 
@@ -164,9 +160,61 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 	}
 }
 
+// Чтение из файла
+int readFile (FILE *fp, char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
+	int i, j, k, c, r;
+	int newGenom[GENOM_LEN];
+	Bots* newBotsList = malloc (sizeof (Bots));  // Создан список ботов
+	if (newBotsList == NULL)
+		return 1;
+	newBotsList->first = NULL;
+	newBotsList->last = NULL;
+	newBotsList->cnt = BOTS_START_CNT;
+	*B = newBotsList;
+	Bot* cur;
+	
+	for (i = 0; i < BOTS_TRIG_CNT; i++) {
+		// Читаем новую строку генома
+		for (j = 0; j < GENOM_LEN; j++) {
+			fscanf(fp, "%d", &newGenom[j]);
+		}
+		// Каждой строке генома соответствуют 8 ботов:
+		for (k = 0; k < BOTS_TRIG_CNT; k++) {
+			cur = malloc (sizeof(Bot));
+			if (cur == NULL)
+				return 1;
+
+			cur->next = NULL;
+			cur->hp = BOTS_START_HP;
+			cur->id = i * BOTS_TRIG_CNT + k;
+			cur->view = getRandomInt (0, 7);
+			do {
+				c = getRandomInt (1, F_SIZE_HOR-1);
+				r = getRandomInt (1, F_SIZE_VERT-1);
+			} while (F[r][c] != F_CHAR_SPACE);
+			cur->col = c;
+			cur->row = r;
+			F[r][c] = cur->hp / 10 + '0';
+			memcpy (cur->genom, newGenom, sizeof(newGenom));
+
+			if ((*B)->last == NULL) {
+				(*B)->first = cur;
+				(*B)->last = cur;
+			}
+			else {
+				(*B)->last->next = cur;
+				(*B)->last = (*B)->last->next;
+			}
+		}
+	}
+	return 0;
+}
+
+
 // Загружает или создает новую конфигурацию симуляции
-int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
-	int i, j, createOrLoad = 1;
+int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
+	int i, j, createOrLoad = 0;
+	FILE* fp;
 	srand (time(NULL));
 	/*
 	printf("Создать или загрузить симуляцию? [1\\0]: ");
@@ -178,7 +226,7 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	// Создание новой
 	if (createOrLoad == 1) {
 		// Создание мира со стенами
-		initField (F, Bots);
+		initField (F);
 		// Создание ботов
 		if (initBots (F, Bots))
 			return 1;
@@ -194,7 +242,38 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	}
 	// Загрузка из файла
 	else {
-		// Не реализовано
+		if ((fp = fopen (FILE_INP_NAME, "r")) == NULL) {
+			printf ("Не найден файл\n");
+			system ("pause");
+			return 1;
+		}
+		else { 
+			// Файл найден:
+			initField (F);
+
+			if (readFile (fp, F, Bots)) {
+				printf ("Ошибка при чтении\n");
+				system ("pause");
+				return 1;
+			}
+			// Заполнение мира едой и ядом
+			fillField (F);
+
+			for (i = 0; i < F_SIZE_VERT; i++) {
+				for (j = 0; j < F_SIZE_HOR; j++) {
+					printf("%c", F[i][j]);
+				}
+				printf("\n");
+			}
+			fclose (fp);
+		}
+	}
+	Conf->genNum = 0;
+	Conf->stepNum = 0;
+	for (i = 0; i < BOTS_TRIG_CNT; i++) {
+		Conf->savedGens[i] = i; // После загрузки боты размещаются в первых
+		// 8 ячейках, значит после инициализации в них или случайные
+		// боты, или продвинутые. Запомним первые 8 ячеек
 	}
 	return 0;
 }
@@ -206,7 +285,7 @@ int isEndGeneration () {
 
 // Обрабатывает ходы ботов
 int handleBots () {
-
+	return 0;
 }
 
 // Выводит поле и доп информацию
@@ -216,7 +295,7 @@ int printInfo () {
 
 // Проверяет, нажал ли пользователь на паузу
 int isPause () {
-
+	return 0;
 }
 
 // Сохраняет симуляцию
@@ -226,16 +305,16 @@ int saveSim () {
 
 // Уменьшает скорость мелькания экрана
 int littlePause () {
-
+	_sleep(100);
 }
 
 // Создает новое поколение
-int evolveSeed () {
+int evolveGen () {
 
 }
 
 // Заселяет ботов в мир
-int spawnSeed () {
+int spawnGen () {
 
 }
 
@@ -245,35 +324,34 @@ int saveConfig () {
 }
 
 // Объединяет смену ходов, поколений и геномов
-int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
+int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
 	// Условие выхода находится внутри
 	// (По нажатию клавиши)
 	while (1) {
-		while (1)  // Смена поколений
-		{
+		while (1) {  // Смена поколений 
 			if (handleBots ()) // Проверка на конец поколения
 				break;				
 			printInfo ();  // Вывести измененное поле
-			if (isPause ())  // Обработка паузы
-			{
+			if (isPause ()) {  // Обработка паузы
 				if (saveSim ())  // Сохранение в файл
-					return 0;
+					return 1;
 			}
 			else {
-				littlePause ();  // Небольшой Sleep (50), чтобы не мелькал экран
+				littlePause ();  // Небольшой Sleep, чтобы не мелькал экран
 			}
 		}	
 		// Запомнить конфигурацию 
 		saveConfig ();
 		// Сгенерировать новое поколение
-		evolveSeed ();
+		evolveGen ();
 		// Заселить в мир
-		spawnSeed ();
+		spawnGen ();
 	}
+	return 0;
 }
 
 // Завершает работу симуляции
-int result () {
+int result (Bots* Bots, Config *Conf) {
 
 }
 
@@ -282,11 +360,12 @@ int main() {
 
 	char Field[F_SIZE_VERT][F_SIZE_HOR];
 	Bots *Bots;
+	Config Conf;
 
-	if (init (Field, &Bots))
+	if (init (Field, &Bots, &Conf))
 		return 0;
-	mainCycle (Field, &Bots);
-	result ();
+	if (mainCycle (Field, &Bots, &Conf))
+		result (Bots, &Conf);
 
 	scanf("%d");
 	return 0;
