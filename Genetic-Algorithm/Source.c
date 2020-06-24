@@ -43,12 +43,6 @@ typedef struct bots {
 	int cnt;
 } Bots;
 
-typedef struct config {
-	int stepNum; // Номер хода в поколении
-	int genNum; // Номер поколения в генерации
-	int savedGens[BOTS_TRIG_CNT]; // Массив выживших в прошлом поколении геномов
-} Config;
-
 
 // Возвращает случайное число
 int getRandomInt (int min, int max) {
@@ -212,14 +206,14 @@ int readFile (FILE *fp, char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 
 
 // Загружает или создает новую конфигурацию симуляции
-int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
+int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	int i, j, createOrLoad = 0;
+	char fileName[128] = "";
 	FILE* fp;
 	srand (time(NULL));
 	/*
 	printf("Создать или загрузить симуляцию? [1\\0]: ");
-	if (scanf("%d", &createOrLoad) == 0) {
-		scanf("%d");
+	if (scanf("%d\n", &createOrLoad) == 0) {		
 		return 1;
 	}
 	*/
@@ -232,17 +226,14 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
 			return 1;
 		// Заполнение мира едой и ядом
 		fillField (F);
-
-		for (i = 0; i < F_SIZE_VERT; i++) {
-			for (j = 0; j < F_SIZE_HOR; j++) {
-				printf("%c", F[i][j]);
-			}
-			printf("\n");
-		}
 	}
 	// Загрузка из файла
 	else {
-		if ((fp = fopen (FILE_INP_NAME, "r")) == NULL) {
+		printf("\nНазвание файла для загрузки: ");
+		gets (fileName);
+		if (fileName[0] == '\0')
+			memcpy (fileName, FILE_INP_NAME, sizeof(FILE_INP_NAME));
+		if ((fp = fopen (fileName, "r")) == NULL) {
 			printf ("Не найден файл\n");
 			system ("pause");
 			return 1;
@@ -258,22 +249,8 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
 			}
 			// Заполнение мира едой и ядом
 			fillField (F);
-
-			for (i = 0; i < F_SIZE_VERT; i++) {
-				for (j = 0; j < F_SIZE_HOR; j++) {
-					printf("%c", F[i][j]);
-				}
-				printf("\n");
-			}
 			fclose (fp);
 		}
-	}
-	Conf->genNum = 0;
-	Conf->stepNum = 0;
-	for (i = 0; i < BOTS_TRIG_CNT; i++) {
-		Conf->savedGens[i] = i; // После загрузки боты размещаются в первых
-		// 8 ячейках, значит после инициализации в них или случайные
-		// боты, или продвинутые. Запомним первые 8 ячеек
 	}
 	return 0;
 }
@@ -293,14 +270,37 @@ int printInfo () {
 
 }
 
-// Проверяет, нажал ли пользователь на паузу
-int isPause () {
-	return 0;
-}
-
-// Сохраняет симуляцию
-int saveSim () {
-
+// Обрабатывает нажатия клавиш
+int handleKeys () {
+	char symbol, pause;
+	if (_kbhit()) { // Если буфер ввода не пуст
+		while (symbol = _getch()) { // Прочитать введенный символ
+			switch (symbol) {
+			case ' ': 
+				// По нажатию пробела - пауза
+				do {
+					pause = _getch();
+				} while (pause != ' ');
+				break;
+			case 's':
+			case 'S':
+			case 'ы':
+			case 'Ы':
+				// Сохранение
+				return 1;
+			case 'q':
+			case 'Q':
+			case 'й':
+			case 'Й':
+			case 27: 
+				// Выход на q или Esc
+				return 0;
+			}
+		}
+		fflush (stdin); // Остальные символы удаляем
+	}
+	else
+		return 2; // Продолжать симуляцию
 }
 
 // Уменьшает скорость мелькания экрана
@@ -318,41 +318,57 @@ int spawnGen () {
 
 }
 
-// Сохраняет номера выживших ботов
-int saveConfig () {
-
-}
-
 // Объединяет смену ходов, поколений и геномов
-int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots, Config *Conf) {
-	// Условие выхода находится внутри
-	// (По нажатию клавиши)
+int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
+	int state, stepNum = 0, genNum = 0;
+
 	while (1) {
 		while (1) {  // Смена поколений 
 			if (handleBots ()) // Проверка на конец поколения
 				break;				
 			printInfo ();  // Вывести измененное поле
-			if (isPause ()) {  // Обработка паузы
-				if (saveSim ())  // Сохранение в файл
-					return 1;
-			}
-			else {
-				littlePause ();  // Небольшой Sleep, чтобы не мелькал экран
-			}
+			state = handleKeys ();  // Обработка нажатий клавиш
+			if (state == 0) // Выход без сохранения
+				return 0;			
+			if (state == 1)  // Выход с сохранением
+				return 1;
+			littlePause ();  // Небольшой Sleep, чтобы не мелькал экран			
+			stepNum++;
 		}	
-		// Запомнить конфигурацию 
-		saveConfig ();
 		// Сгенерировать новое поколение
 		evolveGen ();
 		// Заселить в мир
 		spawnGen ();
+		genNum++;
 	}
 	return 0;
 }
 
 // Завершает работу симуляции
-int result (Bots* Bots, Config *Conf) {
-
+int saveAndExit (Bots* Bots) {
+	// Сохранить каждый 8ой геном
+	char s[64];
+	Bot *cur;
+	FILE* fp;
+	printf("\nСохранить в файл: \n");
+	gets(s);
+	if ((fp = fopen (s, "w")) == NULL) 
+		return 0;	
+	else {
+		// Сохранение
+		cur = Bots->first;
+		for (int i = 0; i < BOTS_START_CNT; i++) {			
+			if (cur->id % BOTS_TRIG_CNT == 0) {
+				// Выбираем каждого восьмого бота
+				for (int j = 0; j < GENOM_LEN; j++) {
+					fprintf (fp, "%d ", cur->genom[j]);
+				}
+				fprintf (fp, "\n");
+			}			
+			cur = cur->next;
+		}
+		fclose(fp);
+	}
 }
 
 int main() {
@@ -360,13 +376,10 @@ int main() {
 
 	char Field[F_SIZE_VERT][F_SIZE_HOR];
 	Bots *Bots;
-	Config Conf;
 
-	if (init (Field, &Bots, &Conf))
+	if (init (Field, &Bots))
 		return 0;
-	if (mainCycle (Field, &Bots, &Conf))
-		result (Bots, &Conf);
-
-	scanf("%d");
+	if (mainCycle (Field, &Bots))
+		saveAndExit (Bots);
 	return 0;
 }
