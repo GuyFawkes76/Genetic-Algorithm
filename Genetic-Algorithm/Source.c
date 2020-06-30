@@ -42,19 +42,23 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 
 // Обрабатывает ходы ботов
 int handleBots () {
-	return 1;
+	return 0;
 }
 
 // Выводит поле и доп информацию
-int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR]) {
-	
+int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR], int stepNum, int genNum) {	
 	system("cls");
 	for (int i = 0; i < F_SIZE_VERT; i++) {
 		for (int j = 0; j < F_SIZE_HOR; j++) {
 			printf("%c", F[i][j]);
 		}
 		printf("\n");
-	}
+	}	
+	printf("\nТекущий ход: %d\n", stepNum);
+	printf("Номер поколения: %d\n", genNum);
+	printf("\n");
+	printf("Остановка/продолжение - Пробел, сохранить - S, выйти - Q: \n");
+	
 }
 
 // Обрабатывает нажатия клавиш
@@ -68,7 +72,7 @@ int handleKeys () {
 				do {
 					pause = _getch();
 				} while (pause != ' ');
-				break;
+				return 2;
 			case 's':
 			case 'S':
 			case 'ы':
@@ -102,7 +106,7 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 	cur = B->first;
 	// Удаляем из списка мертвых ботов
 	while (cur != NULL) {
-		if (cur->id % 8 != 0) { // cur->hp == 0
+		if (cur->hp == 0) {
 			if (cur == B->first) {
 				B->first = cur->next;
 			}
@@ -169,19 +173,17 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	int state, stepNum = 0, genNum = 0;
 
 	while (1) {
-		while (1) {  // Смена поколений 
-			printInfo (Field);  // Вывести измененное поле
+		while (1) {  // Смена поколений 			
+			if (handleBots ()) // Проверка на конец поколения
+				break;
+			printInfo (Field, stepNum, genNum);  // Вывести измененное поле
 			state = handleKeys ();  // Обработка нажатий клавиш
 			if (state == 0) // Выход без сохранения
 				return 0;
 			if (state == 1)  // Выход с сохранением
 				return 1;
 			littlePause ();  // Небольшой Sleep, чтобы не мелькал экран			
-			stepNum++;
-
-			
-			if (handleBots ()) // Проверка на конец поколения
-				break;
+			stepNum++;			
 		}		
 		clearField (Field);
 		// Сгенерировать новое поколение
