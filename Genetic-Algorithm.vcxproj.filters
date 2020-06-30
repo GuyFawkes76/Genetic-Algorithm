@@ -15,8 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="genetic-algorithm\Source.c">
+    <ClCompile Include="Genetic-Algorithm\Source.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Genetic-Algorithm\init.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Genetic-Algorithm\init.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
