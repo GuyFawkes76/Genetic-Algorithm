@@ -1,4 +1,4 @@
-﻿/*
+/*
 Лабораторная работа номер 5. Генетический алгоритм.
 Червинский Артём, Степаненко Кирилл, ИВТ-13БО.
 
@@ -9,15 +9,16 @@
 #include <locale.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <conio.h>
 #include "init.h"
+
 
 
 // Возвращает случайное число
 int getRandomInt (int min, int max) {
 	return rand() % (max - min + 1) + min;
 }
-
 
 // Наполняет мир едой и ядом
 int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
@@ -38,8 +39,6 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 	}
 }
 
-
-
 // Обрабатывает ходы ботов
 int handleBots () {
 	return 0;
@@ -58,7 +57,6 @@ int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR], int stepNum, int genNum) {
 	printf("Номер поколения: %d\n", genNum);
 	printf("\n");
 	printf("Остановка/продолжение - Пробел, сохранить - S, выйти - Q: \n");
-	
 }
 
 // Обрабатывает нажатия клавиш
@@ -161,9 +159,8 @@ int clearField (char Field[F_SIZE_VERT][F_SIZE_HOR]) {
 	int i, j;
 	for (i = 1; i < F_SIZE_VERT; i++) {
 		for (j = 1; j < F_SIZE_HOR; j++) {
-			if (Field[i][j] != F_CHAR_WALL) {
+			if (Field[i][j] != F_CHAR_WALL) 
 				Field[i][j] = F_CHAR_SPACE;
-			}
 		}
 	}
 }
@@ -215,6 +212,7 @@ int saveAndExit (Bots *Bots) {
 				}
 				fprintf (fp, "\n");
 			}
+
 			cur = cur->next;
 		}
 		fclose(fp);
