@@ -2,6 +2,8 @@
 Лабораторная работа номер 5. Генетический алгоритм.
 Червинский Артём, Степаненко Кирилл, ИВТ-13БО.
 
+
+TODO: Проинициализировать бота. Изменить генерацию поколений. Дописать хэндлер.
 */
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -49,29 +51,37 @@ int isAlive(Bot * bot) {
 
 // Обрабатывает ходы ботов
 int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
-	Bot* curBot;
-	int uselessCnt = 0,
-		curCmd;
+	Bot * curBot = botlist->first;
+	int uselessCnt = 0;
+	// Смена ботов
 	while ((curBot != NULL) && (botlist->cnt > 8)) {
-		for (curCmd = 0; uselessCnt < 10; ) {
+		// Определяется с действием
+		while (uselessCnt < 10) {
 			if (isAlive(curBot)) {
-				if (curBot->genom[curCmd] <= 7) {
+				if (curBot->genom[curBot->curCmd] <= 7) {
 					move(Field, curBot);
 				}
-				else if (curBot->genom[curCmd] <= 15) {
+				else if (curBot->genom[curBot->curCmd] <= 15) {
 					grab(Field, curBot);
 				}
-				else if (curBot->genom[curCmd] <= 23) {
+				else if (curBot->genom[curBot->curCmd] <= 23) {
 					seek(Field, curBot);
 					uselessCnt++;
 				}
-				else if (curBot->genom[curCmd] <= 31) {
+				else if (curBot->genom[curBot->curCmd] <= 31) {
 					turn(Field, curBot);
+					uselessCnt++;
 				}
-				else if (curBot->genom[curCmd] <= 63) {
+				else if (curBot->genom[curBot->curCmd] <= 63) {
 					genomeStep(Field, curBot);
+					uselessCnt++;
 				}
 			}
+		}
+		curBot->hp--;
+		if (!isAlive(curBot)) {
+			botlist->cnt--;
+			Field[curBot->row][curBot->col] = F_CHAR_FOOD;
 		}
 	}
 	return 0;
@@ -79,27 +89,104 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 
 // Делает шаг в указанную сторону
 int move (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
-	if ((bot->sight + bot->genom[bot->curCmd]) % 8 == 0) {
-
+	char curCell;
+	int trgRow = bot->row,	// Номер целевого ряда
+		trgCol = bot->col;	// Номер целевой ячейки
+	curCell = getDirection(Field, bot, &trgRow, &trgCol);
+	switch (curCell) {
+		case F_CHAR_POIS:
+			bot->hp = 0;
+			Field[bot->row][bot->col] = F_CHAR_POIS;
+			break;
+		case F_CHAR_FOOD:
+			bot->hp += FOOD_HP;
+			if (bot->hp > 99)
+				bot->hp = 99;
+			Field[bot->row][bot->col] = F_CHAR_SPACE;
+			Field[trgRow][trgCol] = '0' + bot->hp / 10;
+			break;
+		case F_CHAR_SPACE:
+			Field[bot->row][bot->col] = F_CHAR_SPACE;
+			Field[trgRow][trgCol] = '0' + bot->hp / 10;
+			break;
+		default:
+			break;
 	}
+}
+
+// 
+char getDirection (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot, int * row, int * col) {
+	int direction = (bot->sight + bot->genom[bot->curCmd]) % 8;
+	switch (direction) {
+		case 0:
+			(*row)--;
+			break;
+		case 1:
+			(*row)--;
+			(*col)++;
+			break;
+		case 2:
+			(*col)++;
+			break;
+		case 3:
+			(*row)++;
+			(*col)++;
+			break;
+		case 4:
+			(*row)++;
+			break;
+		case 5:
+			(*row)++;
+			(*col)--;
+			break;
+		case 6:
+			(*col)--;
+			break;
+		case 7:
+			(*row)--;
+			(*col)--;
+			break;
+	}
+	return Field[*row][*col];
 }
 
 // Хватает предмет в указанной стороне или преобразует яд в еду
 int grab (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
-
+	char curCell;
+	int trgRow = bot->row,	// Номер целевого ряда
+		trgCol = bot->col;	// Номер целевой ячейки
+	curCell = getDirection(Field, bot, &trgRow, &trgCol);
+	switch (curCell) {
+	case F_CHAR_POIS:
+		Field[trgRow][trgCol] = F_CHAR_FOOD;
+		break;
+	case F_CHAR_FOOD:
+		bot->hp += FOOD_HP;
+		if (bot->hp > 99)
+			bot->hp = 99;
+		Field[trgRow][trgCol] = F_CHAR_SPACE;
+		Field[bot->row][bot->col] = '0' + bot->hp / 10;
+		break;
+	default:
+		break;
+	}
 }
 
 // Смотрит, что находится в указанной стороне
 int seek (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
-
+	char curCell;
+	int trgRow = bot->row,	// Номер целевого ряда
+		trgCol = bot->col;	// Номер целевой ячейки
+	curCell = getDirection(Field, bot, &trgRow, &trgCol);
+	genomeWarp(bot, curCell);
 }
 
 // Поворачивает бота на указанное направление
 int turn (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
-
+	int direction = (bot->sight + bot->genom[bot->curCmd]) % 8;
 }
 
-// Прыгает на нужную ячеёку в геноме бота
+// Прыгает на нужную ячейку в геноме бота
 int genomeStep (Bot * bot) {
 
 }
@@ -107,7 +194,16 @@ int genomeStep (Bot * bot) {
 // Смещает на нужное количество ячеек в геноме бота в зависимости от того, что находится в клетке
 int genomeWarp(Bot * bot, char curSymbol) {
 	switch (curSymbol) {
-		case 
+	case F_CHAR_POIS:
+		bot->curCmd += 1;
+	case F_CHAR_WALL:
+		bot->curCmd += 2;
+	case F_CHAR_FOOD:
+		bot->curCmd += 4;
+	case F_CHAR_SPACE:
+		bot->curCmd += 5;
+	default: 
+		bot->curCmd += 3;
 	}
 }
 

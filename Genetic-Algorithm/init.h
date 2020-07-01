@@ -13,6 +13,7 @@
 #define BOTS_START_CNT 64
 #define BOTS_TRIG_CNT 8
 #define BOTS_START_HP 30
+#define FOOD_HP 10
 #define F_SIZE_HOR 51
 #define F_SIZE_VERT 21
 #define F_WALLS_CNT 8
@@ -27,7 +28,7 @@
 // Все данные бота
 typedef struct bot {
 	int genom[GENOM_LEN];
-	//int curCmd; //Номер команды  в геноме для исполнения 0..63
+	int curCmd; //Номер команды  в геноме для исполнения 0..63
 	int id; // Идентификатор 0..63	
 	int row, col; // row и col, координаты бота
 	int hp; // Число очков жизни 0..99
