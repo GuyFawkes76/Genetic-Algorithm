@@ -53,19 +53,19 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 	for (curBot = botlist->first; curBot; curBot = curBot->next) {
 		if (isAlive(curBot)) {
 			if (curBot->genom[curBot->curCmd] <= 7) {
-
+				move();
 			}
 			if ((curBot->genom[curBot->curCmd] >= 8) && (curBot->genom[curBot->curCmd] <= 15))  {
-
+				grab();
 			}
 			if ((curBot->genom[curBot->curCmd] >= 16) && (curBot->genom[curBot->curCmd] <= 23)) {
-
+				seek();
 			}
 			if ((curBot->genom[curBot->curCmd] >= 24) && (curBot->genom[curBot->curCmd] <= 31)) {
-
+				turn();
 			}
 			if ((curBot->genom[curBot->curCmd] >= 32) && (curBot->genom[curBot->curCmd] <= 63)) {
-
+				genomeStep();
 			}
 		}
 	}
@@ -77,7 +77,7 @@ int move() {
 
 }
 
-// Хватает предмет в указанной стороне
+// Хватает предмет в указанной стороне или преобразует яд в еду
 int grab() {
 
 }
@@ -94,6 +94,11 @@ int turn() {
 
 // Прыгает на нужную ячеёку в геноме бота
 int genomeStep() {
+
+}
+
+// Смещает на нужное количество ячеек в геноме бота в зависимости от того, что находится в клетке
+int genomeWarp() {
 
 }
 
