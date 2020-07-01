@@ -39,7 +39,7 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 	}
 }
 
-//Функция, проверяющая, живой ли бот.
+// Проверяет, живой ли бот
 int isAlive(Bot * bot) {
 	if (bot->hp <= 0)
 		return 0;
@@ -48,11 +48,45 @@ int isAlive(Bot * bot) {
 }
 
 // Обрабатывает ходы ботов
-int handleBots (Bots * botlist) {
-	
+int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
+	Bot* curBot;
+	for (curBot = botlist->first; curBot; curBot = curBot->next) {
+		if (isAlive(curBot)) {
+			if (curBot->genom[curBot->curCmd] < 8) {
+
+			}
+			if ((curBot->genom[curBot->curCmd] > 7) && (curBot->genom[curBot->curCmd] < 16))  {
+
+			}
+		}
+	}
+	return 0;
 }
 
+// Делает шаг в указанную сторону
+int move() {
 
+}
+
+// Хватает предмет в указанной стороне
+int grab() {
+
+}
+
+// Смотрит, что находится в указанной стороне
+int seek() {
+
+}
+
+// Поворачивает бота на указанное направление
+int turn() {
+
+}
+
+// Прыгает на нужную ячеёку в геноме бота
+int genomeStep() {
+
+}
 
 // Выводит поле и доп информацию
 int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR], int stepNum, int genNum) {	
@@ -181,7 +215,7 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 
 	while (1) {
 		while (1) {  // Смена поколений 			
-			if (handleBots ()) // Проверка на конец поколения
+			if (handleBots (*Bots)) // Проверка на конец поколения
 				break;
 			printInfo (Field, stepNum, genNum);  // Вывести измененное поле
 			state = handleKeys ();  // Обработка нажатий клавиш
