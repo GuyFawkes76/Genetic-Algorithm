@@ -215,7 +215,7 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 
 	while (1) {
 		while (1) {  // Смена поколений 			
-			if (handleBots (*Bots)) // Проверка на конец поколения
+			if (handleBots (Field, *Bots)) // Проверка на конец поколения
 				break;
 			printInfo (Field, stepNum, genNum);  // Вывести измененное поле
 			state = handleKeys ();  // Обработка нажатий клавиш
