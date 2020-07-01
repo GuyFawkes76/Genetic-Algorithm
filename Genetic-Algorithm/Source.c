@@ -50,22 +50,27 @@ int isAlive(Bot * bot) {
 // Обрабатывает ходы ботов
 int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 	Bot* curBot;
-	for (curBot = botlist->first; curBot; ) {
-		if (isAlive(curBot)) {
-			if (curBot->genom[curBot->curCmd] <= 7) {
-				move(Field, curBot);
-			}
-			if ((curBot->genom[curBot->curCmd] >= 8) && (curBot->genom[curBot->curCmd] <= 15))  {
-				grab(Field, curBot);
-			}
-			if ((curBot->genom[curBot->curCmd] >= 16) && (curBot->genom[curBot->curCmd] <= 23)) {
-				seek(Field, curBot);
-			}
-			if ((curBot->genom[curBot->curCmd] >= 24) && (curBot->genom[curBot->curCmd] <= 31)) {
-				turn(Field, curBot);
-			}
-			if ((curBot->genom[curBot->curCmd] >= 32) && (curBot->genom[curBot->curCmd] <= 63)) {
-				genomeStep(Field, curBot);
+	int uselessCnt = 0,
+		curCmd;
+	while ((curBot != NULL) && (botlist->cnt > 8)) {
+		for (curCmd = 0; uselessCnt < 10; ) {
+			if (isAlive(curBot)) {
+				if (curBot->genom[curCmd] <= 7) {
+					move(Field, curBot);
+				}
+				else if (curBot->genom[curCmd] <= 15) {
+					grab(Field, curBot);
+				}
+				else if (curBot->genom[curCmd] <= 23) {
+					seek(Field, curBot);
+					uselessCnt++;
+				}
+				else if (curBot->genom[curCmd] <= 31) {
+					turn(Field, curBot);
+				}
+				else if (curBot->genom[curCmd] <= 63) {
+					genomeStep(Field, curBot);
+				}
 			}
 		}
 	}
@@ -73,33 +78,37 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 }
 
 // Делает шаг в указанную сторону
-int move() {
+int move (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
+	if ((bot->sight + bot->genom[bot->curCmd]) % 8 == 0) {
 
+	}
 }
 
 // Хватает предмет в указанной стороне или преобразует яд в еду
-int grab() {
+int grab (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 
 }
 
 // Смотрит, что находится в указанной стороне
-int seek() {
+int seek (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 
 }
 
 // Поворачивает бота на указанное направление
-int turn() {
+int turn (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 
 }
 
 // Прыгает на нужную ячеёку в геноме бота
-int genomeStep() {
+int genomeStep (Bot * bot) {
 
 }
 
 // Смещает на нужное количество ячеек в геноме бота в зависимости от того, что находится в клетке
-int genomeWarp() {
-
+int genomeWarp(Bot * bot, char curSymbol) {
+	switch (curSymbol) {
+		case 
+	}
 }
 
 // Выводит поле и доп информацию
@@ -190,7 +199,7 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 			cur->next = prev->next;
 			cur->hp = BOTS_START_HP;
 			cur->id = i * BOTS_TRIG_CNT + k;
-			cur->view = getRandomInt (0, 7);
+			cur->sight = getRandomInt (0, 7);
 			do {
 				c = getRandomInt (1, F_SIZE_HOR - 1);
 				r = getRandomInt (1, F_SIZE_VERT - 1);

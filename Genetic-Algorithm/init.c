@@ -7,7 +7,7 @@ int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number) {
 	cur->next = NULL;
 	cur->hp = BOTS_START_HP;
 	cur->id = number;
-	cur->view = getRandomInt (0, 7);
+	cur->sight = getRandomInt (0, 7);
 	do {
 		c = getRandomInt (1, F_SIZE_HOR-1);
 		r = getRandomInt (1, F_SIZE_VERT-1);
@@ -115,7 +115,7 @@ int readFile (FILE *fp, char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 			cur->next = NULL;
 			cur->hp = BOTS_START_HP;
 			cur->id = i * BOTS_TRIG_CNT + k;
-			cur->view = getRandomInt (0, 7);
+			cur->sight = getRandomInt (0, 7);
 			do {
 				c = getRandomInt (1, F_SIZE_HOR - 1);
 				r = getRandomInt (1, F_SIZE_VERT - 1);
