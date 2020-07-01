@@ -52,10 +52,19 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 	Bot* curBot;
 	for (curBot = botlist->first; curBot; curBot = curBot->next) {
 		if (isAlive(curBot)) {
-			if (curBot->genom[curBot->curCmd] < 8) {
+			if (curBot->genom[curBot->curCmd] <= 7) {
 
 			}
-			if ((curBot->genom[curBot->curCmd] > 7) && (curBot->genom[curBot->curCmd] < 16))  {
+			if ((curBot->genom[curBot->curCmd] >= 8) && (curBot->genom[curBot->curCmd] <= 15))  {
+
+			}
+			if ((curBot->genom[curBot->curCmd] >= 16) && (curBot->genom[curBot->curCmd] <= 23)) {
+
+			}
+			if ((curBot->genom[curBot->curCmd] >= 24) && (curBot->genom[curBot->curCmd] <= 31)) {
+
+			}
+			if ((curBot->genom[curBot->curCmd] >= 32) && (curBot->genom[curBot->curCmd] <= 63)) {
 
 			}
 		}
