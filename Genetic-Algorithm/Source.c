@@ -39,10 +39,20 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 	}
 }
 
-// Обрабатывает ходы ботов
-int handleBots () {
-	return 0;
+//Функция, проверяющая, живой ли бот.
+int isAlive(Bot * bot) {
+	if (bot->hp <= 0)
+		return 0;
+	else 
+		return 1;
 }
+
+// Обрабатывает ходы ботов
+int handleBots (Bots * botlist) {
+	
+}
+
+
 
 // Выводит поле и доп информацию
 int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR], int stepNum, int genNum) {	
@@ -179,8 +189,8 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 				return 0;
 			if (state == 1)  // Выход с сохранением
 				return 1;
-			littlePause ();  // Небольшой Sleep, чтобы не мелькал экран			
-			stepNum++;			
+			littlePause ();  // Небольшой Sleep, чтобы не мелькал экран
+			stepNum++;
 		}		
 		clearField (Field);
 		// Сгенерировать новое поколение
