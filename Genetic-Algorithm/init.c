@@ -22,6 +22,55 @@ int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number) {
 	return 0;
 }
 
+// Загружает или создает новую конфигурацию симуляции
+int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots** Bots) {
+	int i, j, createOrLoad = 0;
+	char fileName[128] = "";
+	FILE* fp;
+	srand(time(NULL));
+	/*
+	printf("Create \\ load? [1\\0]: ");
+	if (scanf("%d\n", &createOrLoad) == 0) {
+		return 1;
+	}
+	*/
+
+	if (createOrLoad == 1) {  // Создание новой
+		// Создание мира со стенами
+		initField(F);
+		// Создание ботов
+		if (initBots(F, Bots))
+			return 1;
+		// Заполнение мира едой и ядом
+		fillField(F);
+	}
+	else {  // Загрузка из файла
+		printf("\nLoad file name: ");
+		gets(fileName);
+		if (!strlen(fileName))
+			memcpy(fileName, FILE_INP_NAME, sizeof(FILE_INP_NAME));
+		if ((fp = fopen(fileName, "r")) == NULL) {
+			printf("No file\n");
+			system("pause");
+			return 1;
+		}
+		else {
+			// Файл найден:
+			initField(F);
+
+			if (readFile(fp, F, Bots)) {
+				printf("Reading error\n");
+				system("pause");
+				return 1;
+			}
+			// Заполнение мира едой и ядом
+			fillField(F);
+			fclose(fp);
+		}
+	}
+	return 0;
+}
+
 // Создает список ботов
 int initBots (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 	int i;
@@ -136,56 +185,6 @@ int readFile (FILE *fp, char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B) {
 				(*B)->last->next = cur;
 				(*B)->last = (*B)->last->next;
 			}
-		}
-	}
-	return 0;
-}
-
-
-// Загружает или создает новую конфигурацию симуляции
-int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
-	int i, j, createOrLoad = 0;
-	char fileName[128] = "";
-	FILE *fp;
-	srand (time(NULL));
-	/*
-	printf("Create \\ load? [1\\0]: ");
-	if (scanf("%d\n", &createOrLoad) == 0) {
-		return 1;
-	}
-	*/
-	
-	if (createOrLoad == 1) {  // Создание новой
-		// Создание мира со стенами
-		initField (F);
-		// Создание ботов
-		if (initBots (F, Bots))
-			return 1;
-		// Заполнение мира едой и ядом
-		fillField (F);
-	}
-	else {  // Загрузка из файла
-		printf("\nLoad file name: ");
-		gets (fileName);
-		if (!strlen (fileName))
-			memcpy (fileName, FILE_INP_NAME, sizeof(FILE_INP_NAME));
-		if ((fp = fopen (fileName, "r")) == NULL) {
-			printf ("No file\n");
-			system ("pause");
-			return 1;
-		}
-		else {
-			// Файл найден:
-			initField (F);
-
-			if (readFile (fp, F, Bots)) {
-				printf ("Reading error\n");
-				system ("pause");
-				return 1;
-			}
-			// Заполнение мира едой и ядом
-			fillField (F);
-			fclose (fp);
 		}
 	}
 	return 0;
