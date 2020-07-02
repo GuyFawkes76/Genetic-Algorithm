@@ -13,7 +13,6 @@
 #define BOTS_START_CNT 64
 #define BOTS_TRIG_CNT 8
 #define BOTS_START_HP 30
-#define FOOD_HP 10
 #define F_SIZE_HOR 51
 #define F_SIZE_VERT 21
 #define F_WALLS_CNT 8
@@ -23,6 +22,12 @@
 #define F_CHAR_SPACE ' '
 #define F_CHAR_FOOD '@'
 #define F_CHAR_POIS 'я'
+#define FOOD_HP 10
+#define GENOME_POIS_OFFSET 1
+#define GENOME_WALL_OFFSET 2
+#define GENOME_BOT_OFFSET 3
+#define GENOME_FOOD_OFFSET 4
+#define GENOME_SPACE_OFFSET 5
 
 
 // Все данные бота
