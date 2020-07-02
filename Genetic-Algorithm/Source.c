@@ -61,9 +61,11 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 			if (isAlive(curBot)) {
 				if (curBot->genom[curBot->curCmd] <= 7) {
 					move(Field, curBot);
+					break;
 				}
 				else if (curBot->genom[curBot->curCmd] <= 15) {
 					grab(Field, curBot);
+					break;
 				}
 				else if (curBot->genom[curBot->curCmd] <= 23) {
 					seek(Field, curBot);
