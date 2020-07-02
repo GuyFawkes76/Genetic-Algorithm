@@ -32,8 +32,5 @@
     <ClInclude Include="Genetic-Algorithm\evolution.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Genetic-Algorithm\evloution.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
