@@ -24,7 +24,7 @@ int getRandomInt (int min, int max) {
 
 // Наполняет мир едой и ядом
 int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
-	int i, j, r, c;
+	int i, r, c;
 	for (i = 0; i < F_FOOD_CNT; i++) {
 		do {
 			r = getRandomInt (1, F_SIZE_VERT);
@@ -38,6 +38,28 @@ int fillField (char F[F_SIZE_VERT][F_SIZE_HOR]) {
 			c = getRandomInt (1, F_SIZE_HOR);
 		} while (F[r][c] != F_CHAR_SPACE);
 		F[r][c] = F_CHAR_POIS;
+	}
+}
+
+
+// Добавляет на поле некоторое количество еды и яда каждый ход
+int addFoodAndPois(char Field[F_SIZE_VERT][F_SIZE_HOR]) {
+	int i,		// Бегунок
+		row,	// Текущий сгенерированный номер строки
+		col;	// Текущий сгенерированный номер столбца
+	for (i = 0; i < F_ADDFOOD_CNT; i++) {
+		do {
+			row = getRandomInt(1, F_SIZE_VERT);
+			col = getRandomInt(1, F_SIZE_HOR);
+		} while (Field[row][col] != F_CHAR_SPACE);
+		Field[row][col] = F_CHAR_FOOD;
+	}
+	for (i = 0; i < F_ADDPOIS_CNT; i++) {
+		do {
+			row = getRandomInt(1, F_SIZE_VERT);
+			col = getRandomInt(1, F_SIZE_HOR);
+		} while (Field[row][col] != F_CHAR_SPACE);
+		Field[row][col] = F_CHAR_POIS;
 	}
 }
 
@@ -365,12 +387,14 @@ int clearField (char Field[F_SIZE_VERT][F_SIZE_HOR]) {
 
 // Объединяет смену ходов, поколений и геномов
 int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
+	
 	int state, stepNum = 0, genNum = 0;
 
 	while (1) {
 		while (1) {  // Смена поколений 			
 			if (handleBots (Field, *Bots)) // Проверка на конец поколения
 				break;
+			addFoodAndPois(Field);
 			printInfo (Field, stepNum, genNum);  // Вывести измененное поле
 			state = handleKeys ();  // Обработка нажатий клавиш
 			if (state == 0) // Выход без сохранения
@@ -385,6 +409,7 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 		evolveGen (Field, *Bots);		
 		fillField (Field);
 		genNum++;
+		stepNum = 0;
 	}
 	return 0;
 }
