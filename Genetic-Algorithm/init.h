@@ -49,12 +49,11 @@ typedef struct bots {
 	int cnt;
 } Bots;
 
+// Создает случайного бота
+int createRandomBot(char F[F_SIZE_VERT][F_SIZE_HOR], Bot* cur, int number);
 
 // Загружает или создает новую конфигурацию симуляции
 int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots);
-
-// Создает случайного бота
-int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number);
 
 // Создает список ботов
 int initBots (char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B);
@@ -65,8 +64,4 @@ int initField (char F[F_SIZE_VERT][F_SIZE_HOR]);
 // Чтение из файла
 int readFile (FILE *fp, char F[F_SIZE_VERT][F_SIZE_HOR], Bots **B);
 
-// Загружает или создает новую конфигурацию симуляции
-int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots);
-
-
-#endif
+#endif	//INIT_H
