@@ -18,6 +18,8 @@
 #define F_WALLS_CNT 8
 #define F_FOOD_CNT 64
 #define F_POIS_CNT 32
+#define F_ADDFOOD_CNT 1
+#define F_ADDPOIS_CNT 1
 #define F_CHAR_WALL '#'
 #define F_CHAR_SPACE ' '
 #define F_CHAR_FOOD '@'
