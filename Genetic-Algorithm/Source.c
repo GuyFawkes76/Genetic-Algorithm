@@ -109,6 +109,9 @@ int move (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 			Field[bot->row][bot->col] = F_CHAR_SPACE;
 			Field[trgRow][trgCol] = '0' + bot->hp / 10;
 			break;
+		case F_CHAR_WALL:
+
+			break;
 		default:
 			break;
 	}
@@ -167,6 +170,12 @@ int grab (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 		Field[trgRow][trgCol] = F_CHAR_SPACE;
 		Field[bot->row][bot->col] = '0' + bot->hp / 10;
 		break;
+	case F_CHAR_SPACE:
+
+		break;
+	case F_CHAR_WALL:
+
+		break;
 	default:
 		break;
 	}
@@ -182,28 +191,28 @@ int seek (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 }
 
 // Поворачивает бота на указанное направление
-int turn (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
-	int direction = (bot->sight + bot->genom[bot->curCmd]) % 8;
+int turn (/*char Field[F_SIZE_VERT][F_SIZE_HOR],*/ Bot * bot) {
+	bot->sight = (bot->sight + bot->genom[bot->curCmd]) % 8;
 }
 
 // Прыгает на нужную ячейку в геноме бота
 int genomeStep (Bot * bot) {
-
+	bot->curCmd += bot->genom[bot->curCmd];
 }
 
 // Смещает на нужное количество ячеек в геноме бота в зависимости от того, что находится в клетке
 int genomeWarp(Bot * bot, char curSymbol) {
 	switch (curSymbol) {
 	case F_CHAR_POIS:
-		bot->curCmd += 1;
+		bot->curCmd += GENOME_POIS_OFFSET;
 	case F_CHAR_WALL:
-		bot->curCmd += 2;
+		bot->curCmd += GENOME_WALL_OFFSET;
 	case F_CHAR_FOOD:
-		bot->curCmd += 4;
+		bot->curCmd += GENOME_FOOD_OFFSET;
 	case F_CHAR_SPACE:
-		bot->curCmd += 5;
+		bot->curCmd += GENOME_SPACE_OFFSET;
 	default: 
-		bot->curCmd += 3;
+		bot->curCmd += GENOME_BOT_OFFSET;
 	}
 }
 
