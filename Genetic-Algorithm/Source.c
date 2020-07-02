@@ -83,12 +83,14 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 			else 
 				break;
 		}
-		curBot->hp--;
-		if (!isAlive(curBot)) {
+
+		if (curBot->hp == 0 || curBot->hp == 1) {
+			curBot->hp = -10;
 			botlist->cnt--;
 			Field[curBot->row][curBot->col] = F_CHAR_FOOD;
 		}
-		else {
+		else if (curBot->hp > 1){
+			curBot->hp--;
 			Field[curBot->row][curBot->col] = '0' + curBot->hp / 10;
 		}
 		curBot = curBot->next;
@@ -287,7 +289,7 @@ int handleKeys () {
 
 // Уменьшает скорость мелькания экрана
 int littlePause () {
-	_sleep(100);
+	_sleep(10);
 }
 
 // Создает новое поколение
