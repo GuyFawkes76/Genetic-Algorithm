@@ -83,8 +83,13 @@ int handleBots (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots * botlist) {
 			botlist->cnt--;
 			Field[curBot->row][curBot->col] = F_CHAR_FOOD;
 		}
+		else 
+			Field[curBot->row][curBot->col] = '0' + curBot->hp / 10;
 	}
-	return 0;
+	if (botlist->cnt == 8)
+		return 1;
+	else
+		return 0;
 }
 
 // Делает шаг в указанную сторону
@@ -110,11 +115,11 @@ int move (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 			Field[trgRow][trgCol] = '0' + bot->hp / 10;
 			break;
 		case F_CHAR_WALL:
-
 			break;
 		default:
 			break;
 	}
+	genomeWarp(bot, curCell);
 }
 
 // 
@@ -171,14 +176,13 @@ int grab (char Field[F_SIZE_VERT][F_SIZE_HOR], Bot * bot) {
 		Field[bot->row][bot->col] = '0' + bot->hp / 10;
 		break;
 	case F_CHAR_SPACE:
-
 		break;
 	case F_CHAR_WALL:
-
 		break;
 	default:
 		break;
 	}
+	genomeWarp(bot, curCell);
 }
 
 // Смотрит, что находится в указанной стороне
@@ -303,6 +307,7 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 
 			cur->next = prev->next;
 			cur->hp = BOTS_START_HP;
+			cur->curCmd = 0;
 			cur->id = i * BOTS_TRIG_CNT + k;
 			cur->sight = getRandomInt (0, 7);
 			do {
