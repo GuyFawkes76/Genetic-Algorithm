@@ -21,9 +21,15 @@
     <ClCompile Include="Genetic-Algorithm\init.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="evloution.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Genetic-Algorithm\init.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="evolution.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
