@@ -140,7 +140,7 @@ int move(char Field[F_SIZE_VERT][F_SIZE_HOR], Bot* bot) {
 	genomeWarp(bot, curCell);
 }
 
-// 
+// Определяет целевую клетку, возвращает символ из неё. Меняет номер целевых ряда и столбца.
 int getDirection(char Field[F_SIZE_VERT][F_SIZE_HOR], Bot* bot, int* row, int* col) {
 	int direction = (bot->sight + bot->genom[bot->curCmd]) % 8;
 	switch (direction) {
