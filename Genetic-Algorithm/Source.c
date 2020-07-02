@@ -333,7 +333,7 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 			}
 		}
 		else {
-			cur->id = i * BOTS_TRIG_CNT;// Меняем id
+			cur->id = i * BOTS_TRIG_CNT;	// Меняем id
 			i++;
 			prev = cur;
 		}
