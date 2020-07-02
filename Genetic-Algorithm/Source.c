@@ -297,6 +297,7 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 	Bot *cur, *prev, *main;
 	int i, k, r, c, randGen, genNum, genValue;
 	cur = B->first;
+	i = 0;
 	// Удаляем из списка мертвых ботов
 	while (cur != NULL) {
 		if (!isAlive(cur)) {
@@ -310,6 +311,8 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 			}
 		}
 		else {
+			cur->id = i * BOTS_TRIG_CNT;// Меняем id
+			i++;
 			prev = cur;
 		}
 		cur = cur->next;
@@ -346,6 +349,8 @@ int evolveGen (char F[F_SIZE_VERT][F_SIZE_HOR], Bots *B) {
 				cur->genom[genNum] = genValue;
 			}
 		}
+		main = cur->next;
+		prev = cur->next;
 		
 	}
 	//Сбрасываем количество ботов.
