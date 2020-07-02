@@ -270,10 +270,10 @@ int printInfo (char F[F_SIZE_VERT][F_SIZE_HOR], int stepNum, int genNum) {
 		}
 		printf("\n");
 	}	
-	printf("\nТекущий ход: %d\n", stepNum);
-	printf("Номер поколения: %d\n", genNum);
+	printf("\nStep: %d\n", stepNum);
+	printf("Gen: %d\n", genNum);
 	printf("\n");
-	printf("Остановка/продолжение - Пробел, сохранить - S, выйти - Q: \n");
+	printf("Stop - Space, Save - S, Quit - Q: \n");
 }
 
 // Обрабатывает нажатия клавиш
@@ -311,7 +311,7 @@ int handleKeys () {
 
 // Уменьшает скорость мелькания экрана
 int littlePause () {
-	_sleep(10);
+	
 }
 
 // Создает новое поколение
@@ -406,7 +406,7 @@ int mainCycle (char Field[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 				return 0;
 			if (state == 1)  // Выход с сохранением
 				return 1;
-			littlePause ();  // Небольшой Sleep, чтобы не мелькал экран
+			_sleep(0);  // Чтобы не мелькал экран
 			stepNum++;
 		}		
 		clearField (Field);
@@ -425,7 +425,7 @@ int saveAndExit (Bots *Bots) {
 	char s[64];
 	Bot *cur;
 	FILE *fp;
-	printf("\nСохранить в файл: \n");
+	printf("\nSave in file: \n");
 	gets(s);
 	if ((fp = fopen (s, "w")) == NULL)
 		return 0;

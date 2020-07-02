@@ -149,11 +149,12 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 	FILE *fp;
 	srand (time(NULL));
 	/*
-	printf("Создать или загрузить симуляцию? [1\\0]: ");
+	printf("Create \\ load? [1\\0]: ");
 	if (scanf("%d\n", &createOrLoad) == 0) {
 		return 1;
 	}
 	*/
+	
 	if (createOrLoad == 1) {  // Создание новой
 		// Создание мира со стенами
 		initField (F);
@@ -164,12 +165,12 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 		fillField (F);
 	}
 	else {  // Загрузка из файла
-		printf("\nНазвание файла для загрузки: ");
+		printf("\nLoad file name: ");
 		gets (fileName);
 		if (!strlen (fileName))
 			memcpy (fileName, FILE_INP_NAME, sizeof(FILE_INP_NAME));
 		if ((fp = fopen (fileName, "r")) == NULL) {
-			printf ("Не найден файл\n");
+			printf ("No file\n");
 			system ("pause");
 			return 1;
 		}
@@ -178,7 +179,7 @@ int init(char F[F_SIZE_VERT][F_SIZE_HOR], Bots **Bots) {
 			initField (F);
 
 			if (readFile (fp, F, Bots)) {
-				printf ("Ошибка при чтении\n");
+				printf ("Reading error\n");
 				system ("pause");
 				return 1;
 			}
