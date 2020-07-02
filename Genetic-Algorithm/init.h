@@ -5,6 +5,7 @@
 #include <locale.h>
 #include <stdlib.h>
 #include <string.h>
+#include "evolution.h"
 
 #define FILE_INP_NAME "input.txt"
 #define FILE_OUT_NAME "output.txt"

@@ -1,6 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "init.h"
-
 // Создает случайного бота
 int createRandomBot (char F[F_SIZE_VERT][F_SIZE_HOR], Bot *cur, int number) {
 	int i, r, c;

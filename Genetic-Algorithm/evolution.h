@@ -42,4 +42,6 @@ typedef struct bots {
 	int cnt;
 } Bots;
 
+
+
 #endif	//EVOLUTION_H
